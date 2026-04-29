@@ -1,0 +1,4 @@
+import powerbiVisualsApi from "powerbi-visuals-api";
+import IVisualPlugin = powerbiVisualsApi.visuals.plugins.IVisualPlugin;
+declare var dualAxisGroupedBarChartA43F3B337D4A4F3FB81D2968E0B1F2C1: IVisualPlugin;
+export default dualAxisGroupedBarChartA43F3B337D4A4F3FB81D2968E0B1F2C1;

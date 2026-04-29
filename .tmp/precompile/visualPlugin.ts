@@ -9,7 +9,7 @@ var dualAxisGroupedBarChartA43F3B337D4A4F3FB81D2968E0B1F2C1: IVisualPlugin = {
     name: 'dualAxisGroupedBarChartA43F3B337D4A4F3FB81D2968E0B1F2C1',
     displayName: 'Dual Axis Grouped Bar Chart',
     class: 'Visual',
-    apiVersion: '5.3.0',
+    apiVersion: '5.10.0',
     create: (options?: VisualConstructorOptions) => {
         if (Visual) {
             return new Visual(options);

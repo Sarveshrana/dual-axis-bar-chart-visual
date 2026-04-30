@@ -39,6 +39,7 @@ declare class LeftAxisCard extends FormattingSettingsCard {
     leftAxisTitle: formattingSettings.TextInput;
     leftAxisFontSize: formattingSettings.NumUpDown;
     leftAxisDisplayUnits: formattingSettings.ItemDropdown;
+    leftAxisDecimalPlaces: formattingSettings.NumUpDown;
     leftAxisAutoRange: formattingSettings.ToggleSwitch;
     leftAxisMin: formattingSettings.NumUpDown;
     leftAxisMax: formattingSettings.NumUpDown;
@@ -51,6 +52,7 @@ declare class RightAxisCard extends FormattingSettingsCard {
     rightAxisTitle: formattingSettings.TextInput;
     rightAxisFontSize: formattingSettings.NumUpDown;
     rightAxisDisplayUnits: formattingSettings.ItemDropdown;
+    rightAxisDecimalPlaces: formattingSettings.NumUpDown;
     rightAxisAutoRange: formattingSettings.ToggleSwitch;
     rightAxisMin: formattingSettings.NumUpDown;
     rightAxisMax: formattingSettings.NumUpDown;
@@ -70,7 +72,10 @@ declare class DataLabelsCard extends FormattingSettingsCard {
     dataLabelsFontSize: formattingSettings.NumUpDown;
     dataLabelsPrimaryColor: formattingSettings.ColorPicker;
     dataLabelsSecondaryColor: formattingSettings.ColorPicker;
-    dataLabelsDisplayUnits: formattingSettings.ItemDropdown;
+    dataLabelsPrimaryDisplayUnits: formattingSettings.ItemDropdown;
+    dataLabelsSecondaryDisplayUnits: formattingSettings.ItemDropdown;
+    dataLabelsPrimaryDecimalPlaces: formattingSettings.NumUpDown;
+    dataLabelsSecondaryDecimalPlaces: formattingSettings.NumUpDown;
     name: string;
     displayName: string;
     slices: FormattingSettingsSlice[];
@@ -97,6 +102,7 @@ export interface VisualSettings {
     leftAxisTitle: string;
     leftAxisFontSize: number;
     leftAxisDisplayUnits: string;
+    leftAxisDecimalPlaces: number;
     leftAxisAutoRange: boolean;
     leftAxisMin: number;
     leftAxisMax: number;
@@ -104,6 +110,7 @@ export interface VisualSettings {
     rightAxisTitle: string;
     rightAxisFontSize: number;
     rightAxisDisplayUnits: string;
+    rightAxisDecimalPlaces: number;
     rightAxisAutoRange: boolean;
     rightAxisMin: number;
     rightAxisMax: number;
@@ -113,7 +120,10 @@ export interface VisualSettings {
     dataLabelsFontSize: number;
     dataLabelsPrimaryColor: string;
     dataLabelsSecondaryColor: string;
-    dataLabelsDisplayUnits: string;
+    dataLabelsPrimaryDisplayUnits: string;
+    dataLabelsSecondaryDisplayUnits: string;
+    dataLabelsPrimaryDecimalPlaces: number;
+    dataLabelsSecondaryDecimalPlaces: number;
 }
 export declare class VisualFormattingSettingsModel extends FormattingSettingsModel {
     barColorsCard: BarColorsCard;

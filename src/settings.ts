@@ -169,6 +169,11 @@ class LeftAxisCard extends FormattingSettingsCard {
         items: DISPLAY_UNIT_ITEMS,
         value: DISPLAY_UNIT_ITEMS[0]
     });
+    leftAxisDecimalPlaces = new formattingSettings.NumUpDown({
+        name: "leftAxisDecimalPlaces",
+        displayName: "Decimal Places",
+        value: 2
+    });
     leftAxisAutoRange = new formattingSettings.ToggleSwitch({
         name: "leftAxisAutoRange",
         displayName: "Auto Range",
@@ -188,7 +193,7 @@ class LeftAxisCard extends FormattingSettingsCard {
     displayName = "Left Y-Axis (Primary)";
     slices: FormattingSettingsSlice[] = [
         this.showLeftAxis,        this.leftAxisTitle,   this.leftAxisFontSize,
-        this.leftAxisDisplayUnits, this.leftAxisAutoRange,
+        this.leftAxisDisplayUnits, this.leftAxisDecimalPlaces, this.leftAxisAutoRange,
         this.leftAxisMin,         this.leftAxisMax
     ];
 }
@@ -216,6 +221,11 @@ class RightAxisCard extends FormattingSettingsCard {
         items: DISPLAY_UNIT_ITEMS,
         value: DISPLAY_UNIT_ITEMS[0]
     });
+    rightAxisDecimalPlaces = new formattingSettings.NumUpDown({
+        name: "rightAxisDecimalPlaces",
+        displayName: "Decimal Places",
+        value: 2
+    });
     rightAxisAutoRange = new formattingSettings.ToggleSwitch({
         name: "rightAxisAutoRange",
         displayName: "Auto Range",
@@ -235,7 +245,7 @@ class RightAxisCard extends FormattingSettingsCard {
     displayName = "Right Y-Axis (Secondary)";
     slices: FormattingSettingsSlice[] = [
         this.showRightAxis,        this.rightAxisTitle,   this.rightAxisFontSize,
-        this.rightAxisDisplayUnits, this.rightAxisAutoRange,
+        this.rightAxisDisplayUnits, this.rightAxisDecimalPlaces, this.rightAxisAutoRange,
         this.rightAxisMin,         this.rightAxisMax
     ];
 }
@@ -277,18 +287,37 @@ class DataLabelsCard extends FormattingSettingsCard {
         displayName: "Secondary Label Color",
         value: { value: "#7c2d00" }
     });
-    dataLabelsDisplayUnits = new formattingSettings.ItemDropdown({
-        name: "dataLabelsDisplayUnits",
-        displayName: "Display Units",
+    dataLabelsPrimaryDisplayUnits = new formattingSettings.ItemDropdown({
+        name: "dataLabelsPrimaryDisplayUnits",
+        displayName: "Primary Display Units",
         items: DISPLAY_UNIT_ITEMS,
         value: DISPLAY_UNIT_ITEMS[0]
+    });
+    dataLabelsSecondaryDisplayUnits = new formattingSettings.ItemDropdown({
+        name: "dataLabelsSecondaryDisplayUnits",
+        displayName: "Secondary Display Units",
+        items: DISPLAY_UNIT_ITEMS,
+        value: DISPLAY_UNIT_ITEMS[0]
+    });
+    dataLabelsPrimaryDecimalPlaces = new formattingSettings.NumUpDown({
+        name: "dataLabelsPrimaryDecimalPlaces",
+        displayName: "Primary Decimal Places",
+        value: 2
+    });
+    dataLabelsSecondaryDecimalPlaces = new formattingSettings.NumUpDown({
+        name: "dataLabelsSecondaryDecimalPlaces",
+        displayName: "Secondary Decimal Places",
+        value: 2
     });
     name        = "dataLabels";
     displayName = "Data Labels";
     slices: FormattingSettingsSlice[] = [
         this.showDataLabels,     this.dataLabelsFontSize,
         this.dataLabelsPrimaryColor, this.dataLabelsSecondaryColor,
-        this.dataLabelsDisplayUnits
+        this.dataLabelsPrimaryDisplayUnits,
+        this.dataLabelsSecondaryDisplayUnits,
+        this.dataLabelsPrimaryDecimalPlaces,
+        this.dataLabelsSecondaryDecimalPlaces
     ];
 }
 
@@ -315,6 +344,7 @@ export interface VisualSettings {
     leftAxisTitle:            string;
     leftAxisFontSize:         number;
     leftAxisDisplayUnits:     string;
+    leftAxisDecimalPlaces:    number;
     leftAxisAutoRange:        boolean;
     leftAxisMin:              number;
     leftAxisMax:              number;
@@ -322,6 +352,7 @@ export interface VisualSettings {
     rightAxisTitle:           string;
     rightAxisFontSize:        number;
     rightAxisDisplayUnits:    string;
+    rightAxisDecimalPlaces:   number;
     rightAxisAutoRange:       boolean;
     rightAxisMin:             number;
     rightAxisMax:             number;
@@ -331,7 +362,10 @@ export interface VisualSettings {
     dataLabelsFontSize:       number;
     dataLabelsPrimaryColor:   string;
     dataLabelsSecondaryColor: string;
-    dataLabelsDisplayUnits:   string;
+    dataLabelsPrimaryDisplayUnits: string;
+    dataLabelsSecondaryDisplayUnits: string;
+    dataLabelsPrimaryDecimalPlaces: number;
+    dataLabelsSecondaryDecimalPlaces: number;
 }
 
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
@@ -378,6 +412,7 @@ export function getVisualSettings(model?: VisualFormattingSettingsModel): Visual
         leftAxisTitle:            m.leftAxisCard.leftAxisTitle.value,
         leftAxisFontSize:         Math.min(24, Math.max(6,  m.leftAxisCard.leftAxisFontSize.value)),
         leftAxisDisplayUnits:     enumVal(m.leftAxisCard.leftAxisDisplayUnits.value),
+        leftAxisDecimalPlaces:    Math.min(6, Math.max(0, m.leftAxisCard.leftAxisDecimalPlaces.value)),
         leftAxisAutoRange:        m.leftAxisCard.leftAxisAutoRange.value,
         leftAxisMin:              m.leftAxisCard.leftAxisMin.value,
         leftAxisMax:              m.leftAxisCard.leftAxisMax.value,
@@ -385,6 +420,7 @@ export function getVisualSettings(model?: VisualFormattingSettingsModel): Visual
         rightAxisTitle:           m.rightAxisCard.rightAxisTitle.value,
         rightAxisFontSize:        Math.min(24, Math.max(6,  m.rightAxisCard.rightAxisFontSize.value)),
         rightAxisDisplayUnits:    enumVal(m.rightAxisCard.rightAxisDisplayUnits.value),
+        rightAxisDecimalPlaces:   Math.min(6, Math.max(0, m.rightAxisCard.rightAxisDecimalPlaces.value)),
         rightAxisAutoRange:       m.rightAxisCard.rightAxisAutoRange.value,
         rightAxisMin:             m.rightAxisCard.rightAxisMin.value,
         rightAxisMax:             m.rightAxisCard.rightAxisMax.value,
@@ -394,6 +430,9 @@ export function getVisualSettings(model?: VisualFormattingSettingsModel): Visual
         dataLabelsFontSize:       Math.min(20, Math.max(6,  m.dataLabelsCard.dataLabelsFontSize.value)),
         dataLabelsPrimaryColor:   m.dataLabelsCard.dataLabelsPrimaryColor.value.value,
         dataLabelsSecondaryColor: m.dataLabelsCard.dataLabelsSecondaryColor.value.value,
-        dataLabelsDisplayUnits:   enumVal(m.dataLabelsCard.dataLabelsDisplayUnits.value)
+        dataLabelsPrimaryDisplayUnits:   enumVal(m.dataLabelsCard.dataLabelsPrimaryDisplayUnits.value),
+        dataLabelsSecondaryDisplayUnits: enumVal(m.dataLabelsCard.dataLabelsSecondaryDisplayUnits.value),
+        dataLabelsPrimaryDecimalPlaces:   Math.min(6, Math.max(0, m.dataLabelsCard.dataLabelsPrimaryDecimalPlaces.value)),
+        dataLabelsSecondaryDecimalPlaces: Math.min(6, Math.max(0, m.dataLabelsCard.dataLabelsSecondaryDecimalPlaces.value))
     };
 }

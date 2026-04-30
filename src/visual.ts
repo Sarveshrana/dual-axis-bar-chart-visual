@@ -31,6 +31,7 @@ interface TooltipDatum {
     measureName:  string;
     value:        number;
     displayUnits: string;
+    decimalPlaces: number;
 }
 
 interface RenderedBarDatum {
@@ -271,9 +272,9 @@ export class Visual implements IVisual {
         // ── Axes ──────────────────────────────────────────────────────────────
         const tickCount   = Math.max(2, Math.min(6, Math.floor(height / 50)));
         const leftAxisFn  = d3.axisLeft(primaryScale).ticks(tickCount)
-            .tickFormat((v) => this.formatWithUnits(v as number, s.leftAxisDisplayUnits));
+            .tickFormat((v) => this.formatWithUnits(v as number, s.leftAxisDisplayUnits, s.leftAxisDecimalPlaces));
         const rightAxisFn = d3.axisRight(secondaryScale).ticks(tickCount)
-            .tickFormat((v) => this.formatWithUnits(v as number, s.rightAxisDisplayUnits));
+            .tickFormat((v) => this.formatWithUnits(v as number, s.rightAxisDisplayUnits, s.rightAxisDecimalPlaces));
         const xAxisFn     = d3.axisBottom(xScale).tickSize(4);
 
         if (s.showXAxis) {
@@ -356,7 +357,10 @@ export class Visual implements IVisual {
                     category:     item.datum.category,
                     measureName:  this.getMeasureDisplayName(categorical, item.key),
                     value:        item.datum[item.key],
-                    displayUnits: units
+                    displayUnits: units,
+                    decimalPlaces: item.key === "primary"
+                        ? s.leftAxisDecimalPlaces
+                        : s.rightAxisDecimalPlaces
                 });
             })
             .on("pointerleave", () => this.hideTooltip())
@@ -409,10 +413,22 @@ export class Visual implements IVisual {
                 .style("font",        `${s.dataLabelsFontSize}px Segoe UI, sans-serif`)
                 .style("font-weight", "600")
                 .text((item: RenderedBarDatum) => {
-                    const units = item.key === "primary"
+                    const axisUnits = item.key === "primary"
                         ? s.leftAxisDisplayUnits
                         : s.rightAxisDisplayUnits;
-                    return this.formatWithUnits(item.datum[item.key], units);
+                    const units = item.key === "primary"
+                        ? s.dataLabelsPrimaryDisplayUnits
+                        : s.dataLabelsSecondaryDisplayUnits;
+                    const decimalPlaces = item.key === "primary"
+                        ? s.dataLabelsPrimaryDecimalPlaces
+                        : s.dataLabelsSecondaryDecimalPlaces;
+                    return this.formatWithUnits(
+                        item.datum[item.key],
+                        units === "auto"
+                            ? axisUnits
+                            : units,
+                        decimalPlaces
+                    );
                 });
         } else {
             groupSelection.selectAll("text.data-label").remove();
@@ -627,7 +643,7 @@ export class Visual implements IVisual {
 
         this.tooltipCategoryLine.text(tooltipDatum.category);
         this.tooltipValueLine.text(
-            `${tooltipDatum.measureName}: ${this.formatWithUnits(tooltipDatum.value, tooltipDatum.displayUnits)}`
+            `${tooltipDatum.measureName}: ${this.formatWithUnits(tooltipDatum.value, tooltipDatum.displayUnits, tooltipDatum.decimalPlaces)}`
         );
     }
 
@@ -687,23 +703,33 @@ export class Visual implements IVisual {
     }
 
     /** Format a number with optional unit suffix (K / M / B) or auto-detect. */
-    private formatWithUnits(value: number, units: string): string {
+    private formatWithUnits(value: number, units: string, decimalPlaces?: number): string {
         const abs = Math.abs(value);
+        const precision = decimalPlaces ?? 2;
+        const formatFixed = (scaledValue: number, suffix: string): string =>
+            `${scaledValue.toFixed(precision).replace(/\.0+$/, "").replace(/(\.\d*?)0+$/, "$1")}${suffix}`;
+
         switch (units) {
             case "thousands":
-                return (value / 1e3).toFixed(abs >= 10000 ? 0 : 1).replace(/\.0$/, "") + "K";
+                return formatFixed(value / 1e3, "K");
             case "millions":
-                return (value / 1e6).toFixed(abs >= 1e7  ? 0 : 1).replace(/\.0$/, "") + "M";
+                return formatFixed(value / 1e6, "M");
             case "billions":
-                return (value / 1e9).toFixed(abs >= 1e10 ? 0 : 1).replace(/\.0$/, "") + "B";
+                return formatFixed(value / 1e9, "B");
             case "auto": {
-                if (abs >= 1e9) return (value / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
-                if (abs >= 1e6) return (value / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
-                if (abs >= 1e3) return (value / 1e3).toFixed(abs >= 10000 ? 0 : 1).replace(/\.0$/, "") + "K";
-                return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
+                if (abs >= 1e9) { return formatFixed(value / 1e9, "B"); }
+                if (abs >= 1e6) { return formatFixed(value / 1e6, "M"); }
+                if (abs >= 1e3) { return formatFixed(value / 1e3, "K"); }
+                return new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: decimalPlaces === undefined ? 0 : precision,
+                    maximumFractionDigits: precision
+                }).format(value);
             }
             default:
-                return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
+                return new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: decimalPlaces === undefined ? 0 : precision,
+                    maximumFractionDigits: precision
+                }).format(value);
         }
     }
 

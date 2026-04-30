@@ -108,6 +108,7 @@
             { "value": "billions",  "displayName": "Billions (B)"  }
           ]}
         },
+        "leftAxisDecimalPlaces": { "displayName": "Decimal Places",    "type": { "numeric": true } },
         "leftAxisAutoRange": { "displayName": "Auto Range",         "type": { "bool": true }    },
         "leftAxisMin":       { "displayName": "Min Value (manual)", "type": { "numeric": true } },
         "leftAxisMax":       { "displayName": "Max Value (manual)", "type": { "numeric": true } }
@@ -129,6 +130,7 @@
             { "value": "billions",  "displayName": "Billions (B)"  }
           ]}
         },
+        "rightAxisDecimalPlaces": { "displayName": "Decimal Places",    "type": { "numeric": true } },
         "rightAxisAutoRange": { "displayName": "Auto Range",         "type": { "bool": true }    },
         "rightAxisMin":       { "displayName": "Min Value (manual)", "type": { "numeric": true } },
         "rightAxisMax":       { "displayName": "Max Value (manual)", "type": { "numeric": true } }
@@ -157,8 +159,8 @@
           "displayName": "Secondary Label Color",
           "type": { "fill": { "solid": { "color": true } } }
         },
-        "dataLabelsDisplayUnits": {
-          "displayName": "Display Units",
+        "dataLabelsPrimaryDisplayUnits": {
+          "displayName": "Primary Display Units",
           "type": { "enumeration": [
             { "value": "auto",      "displayName": "Auto"          },
             { "value": "none",      "displayName": "None"          },
@@ -166,6 +168,24 @@
             { "value": "millions",  "displayName": "Millions (M)"  },
             { "value": "billions",  "displayName": "Billions (B)"  }
           ]}
+        },
+        "dataLabelsSecondaryDisplayUnits": {
+          "displayName": "Secondary Display Units",
+          "type": { "enumeration": [
+            { "value": "auto",      "displayName": "Auto"          },
+            { "value": "none",      "displayName": "None"          },
+            { "value": "thousands", "displayName": "Thousands (K)" },
+            { "value": "millions",  "displayName": "Millions (M)"  },
+            { "value": "billions",  "displayName": "Billions (B)"  }
+          ]}
+        },
+        "dataLabelsPrimaryDecimalPlaces": {
+          "displayName": "Primary Decimal Places",
+          "type": { "numeric": true }
+        },
+        "dataLabelsSecondaryDecimalPlaces": {
+          "displayName": "Secondary Decimal Places",
+          "type": { "numeric": true }
         }
       }
     }

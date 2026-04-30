@@ -17,6 +17,8 @@ export declare class Visual implements IVisual {
     private readonly tooltip;
     private readonly tooltipCategoryLine;
     private readonly tooltipValueLine;
+    private readonly host;
+    private readonly selectionManager;
     private readonly formattingSettingsService;
     private formattingSettings;
     private settings;

@@ -11,14 +11,19 @@ type DataViewValueColumns = powerbi.DataViewValueColumns;
 type FormattingModel     = powerbi.visuals.FormattingModel;
 type PrimitiveValue      = powerbi.PrimitiveValue;
 type IViewport           = powerbi.IViewport;
+type IVisualHost         = powerbi.extensibility.visual.IVisualHost;
+type ISelectionManager   = powerbi.extensibility.ISelectionManager;
+type ISelectionId        = powerbi.visuals.ISelectionId;
 type VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 type VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 type IVisual             = powerbi.extensibility.visual.IVisual;
 
 interface ChartDatum {
-    category:  string;
-    primary:   number;
-    secondary: number;
+    category:    string;
+    primary:     number;
+    secondary:   number;
+    selectionId: ISelectionId | null;
+    index:       number;
 }
 
 interface TooltipDatum {
@@ -54,7 +59,9 @@ export class Visual implements IVisual {
     private readonly tooltipCategoryLine:  d3.Selection<HTMLDivElement, unknown, null, undefined>;
     private readonly tooltipValueLine:     d3.Selection<HTMLDivElement, unknown, null, undefined>;
 
-    private readonly formattingSettingsService: FormattingSettingsService;
+    private readonly host:                      IVisualHost;
+    private readonly selectionManager:           ISelectionManager;
+    private readonly formattingSettingsService:  FormattingSettingsService;
     private formattingSettings: VisualFormattingSettingsModel;
     private settings: VisualSettings;
 
@@ -65,6 +72,8 @@ export class Visual implements IVisual {
 
         const element = options.element;
 
+        this.host             = options.host;
+        this.selectionManager = options.host.createSelectionManager();
         this.formattingSettingsService = new FormattingSettingsService();
         this.formattingSettings = new VisualFormattingSettingsModel();
         this.settings = getVisualSettings(this.formattingSettings);
@@ -350,7 +359,23 @@ export class Visual implements IVisual {
                     displayUnits: units
                 });
             })
-            .on("pointerleave", () => this.hideTooltip());
+            .on("pointerleave", () => this.hideTooltip())
+            .on("click", (_event: PointerEvent, item: RenderedBarDatum) => {
+                const selId = item.datum.selectionId;
+                if (selId) {
+                    this.selectionManager.select(selId, (_event as MouseEvent).ctrlKey || (_event as MouseEvent).metaKey);
+                } else {
+                    this.selectionManager.clear();
+                }
+            })
+            .on("contextmenu", (event: PointerEvent, item: RenderedBarDatum) => {
+                event.preventDefault();
+                const selId = item.datum.selectionId;
+                this.selectionManager.showContextMenu(selId ?? {}, {
+                    x: event.clientX,
+                    y: event.clientY
+                });
+            });
 
         // ── Data labels ───────────────────────────────────────────────────────
         if (s.showDataLabels) {
@@ -482,11 +507,21 @@ export class Visual implements IVisual {
         const primaryValues   = values[primaryIndex]?.values   ?? [];
         const secondaryValues = values[secondaryIndex]?.values ?? [];
 
-        return categories.map((category, index) => ({
-            category:  this.formatCategory(category),
-            primary:   this.toNumber(primaryValues[index]),
-            secondary: this.toNumber(secondaryValues[index])
-        }));
+        const categorySource = categorical.categories?.[0];
+        return categories.map((category, index) => {
+            const selId = categorySource
+                ? this.host.createSelectionIdBuilder()
+                    .withCategory(categorySource, index)
+                    .createSelectionId()
+                : null;
+            return {
+                category:    this.formatCategory(category),
+                primary:     this.toNumber(primaryValues[index]),
+                secondary:   this.toNumber(secondaryValues[index]),
+                selectionId: selId,
+                index
+            };
+        });
     }
 
     private getValueColumnIndex(
